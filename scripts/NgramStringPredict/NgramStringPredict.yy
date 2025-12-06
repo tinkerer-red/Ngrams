@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"NgramStringPredict",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"NgramStringPredict",
+  "parent":{
+    "name":"Ngrams",
+    "path":"folders/Ngrams.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

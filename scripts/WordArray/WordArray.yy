@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"WordArray",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"WordArray",
+  "parent":{
+    "name":"Ngrams",
+    "path":"Ngrams.yyp",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

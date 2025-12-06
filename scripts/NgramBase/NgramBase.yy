@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"NgramBase",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"NgramBase",
+  "parent":{
+    "name":"Base",
+    "path":"folders/Ngrams/Base.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

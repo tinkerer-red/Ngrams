@@ -1,0 +1,16 @@
+{
+  "FolderOrderSettings":[
+    {"name":"examples","order":16,"path":"folders/examples.yy",},
+    {"name":"Ngrams","order":15,"path":"folders/Ngrams.yy",},
+    {"name":"Base","order":4,"path":"folders/Ngrams/Base.yy",},
+  ],
+  "ResourceOrderSettings":[
+    {"name":"obj_test_ngram_string_predict","order":1,"path":"objects/obj_test_ngram_string_predict/obj_test_ngram_string_predict.yy",},
+    {"name":"obj_test_ngram_token_fuzzy","order":2,"path":"objects/obj_test_ngram_token_fuzzy/obj_test_ngram_token_fuzzy.yy",},
+    {"name":"obj_test_ngram_token_predict","order":3,"path":"objects/obj_test_ngram_token_predict/obj_test_ngram_token_predict.yy",},
+    {"name":"NgramStringPredict","order":1,"path":"scripts/NgramStringPredict/NgramStringPredict.yy",},
+    {"name":"NgramTokenFuzzy","order":2,"path":"scripts/NgramTokenFuzzy/NgramTokenFuzzy.yy",},
+    {"name":"NgramTokenPredict","order":3,"path":"scripts/NgramTokenPredict/NgramTokenPredict.yy",},
+    {"name":"WordArray","order":8,"path":"scripts/WordArray/WordArray.yy",},
+  ],
+}

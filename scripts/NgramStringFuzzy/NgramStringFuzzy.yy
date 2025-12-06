@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"NgramStringFuzzy",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"NgramStringFuzzy",
+  "parent":{
+    "name":"Ngrams",
+    "path":"folders/Ngrams.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
