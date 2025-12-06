@@ -134,9 +134,9 @@ function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 	#region jsDoc
 	/// @func  get_value_array()
-	/// @desc  Returns an array of primary values (strings or token ids),
+	/// @desc  Returns an array of primary values (tokens or strings),
 	///        extracted using __get_value().
-	/// @returns {Array<Real|String>}
+	/// @returns {Array<Any>}
 	#endregion
 	static get_value_array = function() {
 		__finalize_results();
@@ -174,7 +174,7 @@ function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	/// @func  get_top_value()
 	/// @desc  Returns the primary value (string or token id) of the top result,
 	///        or undefined if there are no results.
-	/// @returns {Real|String|Undefined}
+	/// @returns {Any|Undefined}
 	#endregion
 	static get_top_value = function() {
 		__finalize_results();
