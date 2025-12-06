@@ -24,27 +24,27 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 	#endregion
 	static train = function(_string_array) {
 		static __add_observation = function(_context_string, _next_char) {
-	        var _entry_struct = __context_dict[$ _context_string];
-	        if (_entry_struct == undefined) {
-	            _entry_struct = {
-	                counts: {},
-	                total : 0
-	            };
-	            __context_dict[$ _context_string] = _entry_struct;
-	        }
+			var _entry_struct = __context_dict[$ _context_string];
+			if (_entry_struct == undefined) {
+				_entry_struct = {
+					counts: {},
+					total : 0
+				};
+				__context_dict[$ _context_string] = _entry_struct;
+			}
 
-	        var _counts_struct = _entry_struct.counts;
-	        var _old_count     = _counts_struct[$ _next_char];
+			var _counts_struct = _entry_struct.counts;
+			var _old_count     = _counts_struct[$ _next_char];
 
-	        if (_old_count == undefined) {
-	            _counts_struct[$ _next_char] = 1;
-	        }
-	        else {
-	            _counts_struct[$ _next_char] = _old_count + 1;
-	        }
+			if (_old_count == undefined) {
+				_counts_struct[$ _next_char] = 1;
+			}
+			else {
+				_counts_struct[$ _next_char] = _old_count + 1;
+			}
 
-	        _entry_struct.total += 1;
-	    };
+			_entry_struct.total += 1;
+		};
 		
 		__clear_model();
 		

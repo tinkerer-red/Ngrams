@@ -134,8 +134,15 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=10, _max_results=10)
 	/// @desc  Perform a fuzzy search against the trained lexicon using token
 	///        n-grams, updating the internal result arrays. Returns self for
 	///        chaining. The input should be an array of tokens.
-/// @param {Array} _input_tokens
-/// @returns {Struct.NgramTokenFuzzy}
+	///        This variant:
+	///        - Searches from the largest n-grams downwards
+	///        - Only creates new candidates while candidate_count < maxResults
+	///        - Continues to accumulate strength for existing entries
+	///        - Culls candidates whose sequence length (in tokens) is outside
+	///          [75%, 125%] of the input length (clamped so lower bound is
+	///          never below 2).
+	/// @param {Array} _input_tokens
+	/// @returns {Struct.NgramTokenFuzzy}
 	#endregion
 	static search = function(_input_tokens) {
 		__clear_results();
@@ -146,14 +153,14 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=10, _max_results=10)
 			return self;
 		}
 
-		var _result_dict = {};
-		var _result_array_ref = __result_array;
+		var _result_dict       = {};
+		var _result_array_ref  = __result_array;
 
 		var _input_length = array_length(_input_tokens);
 
 		// Exact match check
 		if (_input_length > 0) {
-			var _full_key = __encode_sequence_key(_input_tokens, 0, _input_length);
+			var _full_key    = __encode_sequence_key(_input_tokens, 0, _input_length);
 			var _exact_index = __exact_dict[$ _full_key];
 
 			if (_exact_index != undefined) {
@@ -175,14 +182,23 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=10, _max_results=10)
 			return self;
 		}
 
-		var _local_min   = nGramMin;
-		var _local_max   = min(nGramMax, _input_length);
-		var _length_span = _local_max - _local_min;
+		// Length gating for token sequences:
+		// only consider candidates whose token-count is within [75%, 125%]
+		// of the input length, clamped so the minimum is never below 2.
+		var _min_match_length = max(2, floor(_input_length * 0.75));
+		var _max_match_length = max(2, ceil(_input_length * 1.25));
 
-		var _current_size = _local_min;
-		var _size_index   = 0;
+		var _local_min = nGramMin;
+		var _local_max = min(nGramMax, _input_length);
 
-		while (_size_index <= _length_span) {
+		if (_local_min > _local_max) {
+			_local_min = _local_max;
+		}
+
+		// Search from largest n-gram down to smallest.
+		var _current_size = _local_max;
+
+		while (_current_size >= _local_min) {
 			var _start_index = 0;
 			var _max_start   = _input_length - _current_size;
 
@@ -202,18 +218,30 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=10, _max_results=10)
 						var _existing_entry = _result_dict[$ _result_key];
 
 						if (_existing_entry == undefined) {
-							var _seq_value = __lexicon_sequences[_lex_index];
+							// Length gate: check candidate sequence length in tokens
+							var _seq_value      = __lexicon_sequences[_lex_index];
+							var _seq_length     = is_array(_seq_value) ? array_length(_seq_value) : 0;
 
-							var _new_entry = {
-								value    : _seq_value,
-								strength : 1,
-								lex_index: _lex_index
-							};
+							if (_seq_length < _min_match_length || _seq_length > _max_match_length) {
+								_indices_index++;
+								continue;
+							}
 
-							_result_dict[$ _result_key] = _new_entry;
-							array_push(_result_array_ref, _new_entry);
+							// Only create a new candidate if we are still under maxResults
+							if (array_length(_result_array_ref) < maxResults) {
+								var _new_entry = {
+									value    : _seq_value,
+									strength : 1,
+									lex_index: _lex_index
+								};
+
+								_result_dict[$ _result_key] = _new_entry;
+								array_push(_result_array_ref, _new_entry);
+							}
+							// else: ignore new candidate, we are past cap
 						}
 						else {
+							// Existing candidate: always accumulate strength
 							_existing_entry.strength += 1;
 						}
 
@@ -224,8 +252,7 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=10, _max_results=10)
 				_start_index++;
 			}
 
-			_current_size++;
-			_size_index++;
+			_current_size--;
 		}
 
 		__mark_results_dirty();
