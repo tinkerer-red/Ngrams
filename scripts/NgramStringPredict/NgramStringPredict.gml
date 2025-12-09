@@ -159,42 +159,40 @@ function NgramStringPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10, _cas
 		
 		var _order_value = nGramMin;
 		repeat (_order_range) {
-			if (_prefix_length >= _order_value) {
-				var _context_start  = (_prefix_length - _order_value) + 1;
-				var _context_string = string_copy(_source_string, _context_start, _order_value);
+			var _context_start  = (_prefix_length - _order_value) + 1;
+			var _context_string = string_copy(_source_string, _context_start, _order_value);
 
-				var _entry_struct = __context_dict[$ _context_string];
+			var _entry_struct = __context_dict[$ _context_string];
 
-				if (_entry_struct != undefined && _entry_struct.total > 0) {
-					var _counts_struct = _entry_struct.counts;
-					var _total_count   = _entry_struct.total;
+			if (_entry_struct != undefined && _entry_struct.total > 0) {
+				var _counts_struct = _entry_struct.counts;
+				var _total_count   = _entry_struct.total;
 
-					var _weight_value = _order_value * _order_value;
-                    _weight_sum += _weight_value;
+				var _weight_value = _order_value * _order_value;
+				_weight_sum += _weight_value;
 
-					var _char_names  = variable_struct_get_names(_counts_struct);
-					var _char_count  = array_length(_char_names);
-					var _char_index  = 0;
+				var _char_names  = variable_struct_get_names(_counts_struct);
+				var _char_count  = array_length(_char_names);
+				var _char_index  = 0;
 
-					repeat (_char_count) {
-						var _char_value  = _char_names[_char_index];
-						var _count_value = _counts_struct[$ _char_value];
+				repeat (_char_count) {
+					var _char_value  = _char_names[_char_index];
+					var _count_value = _counts_struct[$ _char_value];
 
-						var _prob_value  = _count_value / _total_count;
+					var _prob_value  = _count_value / _total_count;
 
-						var _old_score = _score_struct[$ _char_value];
-						if (_old_score == undefined) {
-							_score_struct[$ _char_value] = _prob_value * _weight_value;
-						}
-						else {
-							_score_struct[$ _char_value] = _old_score + (_prob_value * _weight_value);
-						}
+					var _old_score = _score_struct[$ _char_value];
+					if (_old_score == undefined) {
+						_score_struct[$ _char_value] = _prob_value * _weight_value;
+					}
+					else {
+						_score_struct[$ _char_value] = _old_score + (_prob_value * _weight_value);
+					}
 
-						_char_index++;
-					};
-				}
+					_char_index++;
+				};
 			}
-
+			
 			_order_value++;
 			_order_index++;
 		};
@@ -239,50 +237,50 @@ function NgramStringPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10, _cas
 	};
 	
 	#region jsDoc
-    /// @func  predict_next_best()
-    /// @desc  Greedy multi-step predictor that uses the current model to
-    ///        repeatedly predict the next best character without mutating
-    ///        the internal result arrays. Starting from the current __input
-    ///        prefix, it returns an array of structs:
-    ///        {
-    ///            value      : String (predicted character),
-    ///            prefix     : String (prefix after appending value),
-    ///            probability: Real   (0..1, probability at that step)
-    ///        }
-    ///        After completion, __input is restored to its original value.
-    /// @param {Real} _steps
-    /// @returns {Array<Struct>}
-    #endregion
-    static predict_next_best = function(_steps) {
-        if (_steps <= 0)
+	/// @func  predict_next_best()
+	/// @desc  Greedy multi-step predictor that uses the current model to
+	///        repeatedly predict the next best character without mutating
+	///        the internal result arrays. Starting from the current __input
+	///        prefix, it returns an array of structs:
+	///        {
+	///            value      : String (predicted character),
+	///            prefix     : String (prefix after appending value),
+	///            probability: Real   (0..1, probability at that step)
+	///        }
+	///        After completion, __input is restored to its original value.
+	/// @param {Real} _steps
+	/// @returns {Array<Struct>}
+	#endregion
+	static predict_next_best = function(_steps) {
+		if (_steps <= 0)
 		|| (__input == "") {
-            return [];
-        }
+			return [];
+		}
 		
-        var _original_input   = __input;
-        var _current_prefix   = __input;
-        var _sequence_results = [];
+		var _original_input   = __input;
+		var _current_prefix   = __input;
+		var _sequence_results = [];
 		
-        var _step_index = 0;
-        while (_step_index < _steps) {
+		var _step_index = 0;
+		while (_step_index < _steps) {
 	        predict(_current_prefix);
 			var _value = get_top_value();
 			var _score = get_top_score();
 			var _step_entry = {
-                value      : _value,
-                prefix     : _current_prefix,
-                probability: _score
-            };
-            array_push(_sequence_results, _step_entry);
+				value      : _value,
+				prefix     : _current_prefix,
+				probability: _score
+			};
+			array_push(_sequence_results, _step_entry);
 			
 			_current_prefix += _value;
 			
-            _step_index++;
-        }
+			_step_index++;
+		}
 		
-        __input = _original_input;
-        return _sequence_results;
-    };
+		__input = _original_input;
+		return _sequence_results;
+	};
 	
 	#region Private
 	
