@@ -8,25 +8,7 @@
 /// @returns {Struct.NgramBase}
 #endregion
 function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
-	nGramMin   = max(1, _n_gram_min);
-	nGramMax   = max(nGramMin, _n_gram_max);
-	maxResults = (_max_results > 0) ? _max_results : 10;
 	
-	__result_array       = [];
-	__result_array_dirty = true;
-	
-	__value_array        = [];
-	__score_array        = [];
-	
-	// Hooks to be set by children
-	// __get_value(_entry) -> primary value (string or token id)
-	// __get_score(_entry) -> numeric score (strength / probability)
-	// __compare(_a, _b)   -> comparator for array_sort
-	static __get_value = undefined;
-	static __get_score = undefined;
-	static __compare   = undefined;
-	
-	// Default train/load/export (children can override)
 	#region jsDoc
 	/// @func  train()
 	/// @desc  Base train method. Children override to build gram structures.
@@ -37,6 +19,8 @@ function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 		// No-op by default
 		return self;
 	};
+	
+	// EXPORT / LOAD
 	
 	#region jsDoc
 	/// @func  export()
@@ -67,57 +51,6 @@ function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 		
 		__clear_results();
 		return self;
-	};
-	
-	// Internal helpers for results
-	
-	static __clear_results = function() {
-		array_resize(__result_array, 0);
-		array_resize(__value_array, 0);
-		array_resize(__score_array, 0);
-
-		__result_array_dirty = true;
-	};
-	
-	static __mark_results_dirty = function() {
-		__result_array_dirty = true;
-	};
-	
-	static __finalize_results = function() {
-		if (!__result_array_dirty) {
-			return;
-		}
-		
-		var _length_result = array_length(__result_array);
-		if (_length_result > 1) {
-			if (is_undefined(__compare)) {
-				array_sort(__result_array, function(_entry_a, _entry_b) {
-					var _score_a = (variable_struct_exists(_entry_a, "score")) ? _entry_a.score : 0;
-					var _score_b = (variable_struct_exists(_entry_b, "score")) ? _entry_b.score : 0;
-					
-					var _difference = _score_b - _score_a;
-					if (_difference > 0) return 1;
-					if (_difference < 0) return -1;
-					return 0;
-				});
-			}
-			else {
-				array_sort(__result_array, __compare);
-			}
-		}
-		
-		if (_length_result > maxResults) {
-			array_resize(__result_array, maxResults);
-		}
-		
-		var _length_result = array_length(__result_array);
-		var _i=0; repeat(_length_result) {
-			var _entry_struct = __result_array[_i];
-			__value_array[_i] = __get_value(_entry_struct);
-			__score_array[_i] = __get_score(_entry_struct);
-		_i++}
-		
-		__result_array_dirty = false;
 	};
 	
 	// Shared public helpers
@@ -219,7 +152,78 @@ function NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 		return 0;
 	};
+	
+	#region Private
+	nGramMin   = max(1, _n_gram_min);
+	nGramMax   = max(nGramMin, _n_gram_max);
+	maxResults = (_max_results > 0) ? _max_results : 10;
+	
+	__result_array       = [];
+	__result_array_dirty = true;
+	
+	__value_array        = [];
+	__score_array        = [];
+	
+	// Hooks to be set by children
+	// __get_value(_entry) -> primary value (string or token id)
+	// __get_score(_entry) -> numeric score (strength / probability)
+	// __compare(_a, _b)   -> comparator for array_sort
+	static __get_value = undefined;
+	static __get_score = undefined;
+	static __compare   = undefined;
+	
+	// Internal helpers for results
+	
+	static __clear_results = function() {
+		array_resize(__result_array, 0);
+		array_resize(__value_array, 0);
+		array_resize(__score_array, 0);
 
+		__result_array_dirty = true;
+	};
+	
+	static __mark_results_dirty = function() {
+		__result_array_dirty = true;
+	};
+	
+	static __finalize_results = function() {
+		if (!__result_array_dirty) {
+			return;
+		}
+		
+		var _length_result = array_length(__result_array);
+		if (_length_result > 1) {
+			if (is_undefined(__compare)) {
+				array_sort(__result_array, function(_entry_a, _entry_b) {
+					var _score_a = (variable_struct_exists(_entry_a, "score")) ? _entry_a.score : 0;
+					var _score_b = (variable_struct_exists(_entry_b, "score")) ? _entry_b.score : 0;
+					
+					var _difference = _score_b - _score_a;
+					if (_difference > 0) return 1;
+					if (_difference < 0) return -1;
+					return 0;
+				});
+			}
+			else {
+				array_sort(__result_array, __compare);
+			}
+		}
+		
+		if (_length_result > maxResults) {
+			array_resize(__result_array, maxResults);
+		}
+		
+		var _length_result = array_length(__result_array);
+		var _i=0; repeat(_length_result) {
+			var _entry_struct = __result_array[_i];
+			__value_array[_i] = __get_value(_entry_struct);
+			__score_array[_i] = __get_score(_entry_struct);
+		_i++}
+		
+		__result_array_dirty = false;
+	};
+	
+	#endregion
 }
 
 

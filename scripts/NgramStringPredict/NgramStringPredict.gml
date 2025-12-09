@@ -10,7 +10,7 @@
 /// @param {Bool} _case_sense  : Whether training and prediction are case-sensitive.
 /// @returns {Struct.NgramStringPredict}
 #endregion
-function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _case_sense=true)
+function NgramStringPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10, _case_sense=true)
 	: NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 	#region jsDoc
@@ -85,9 +85,9 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 
 		return self;
 	};
-
+	
 	// EXPORT / LOAD
-
+	
 	#region jsDoc
 	/// @func  export()
 	/// @desc  Export the predictive model as a struct suitable for json_encode().
@@ -104,7 +104,7 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 		};
 		return _model_struct;
 	};
-
+	
 	#region jsDoc
 	/// @func  load()
 	/// @desc  Load a predictive model from an exported struct.
@@ -123,9 +123,9 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 		__clear_results();
 		return self;
 	};
-
+	
 	// PREDICTION
-
+	
 	#region jsDoc
 	/// @func  predict()
 	/// @desc  Predict the next character(s) for the given prefix string.
@@ -152,11 +152,15 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 		// Aggregate scores from all matching context orders
 		var _score_struct = {};
 		var _weight_sum   = 0;
-
+		
+		var _order_value  = nGramMin;
+		var _order_range  = (nGramMax - nGramMin) + 1;
+		var _order_index  = 0;
+		
 		var _order_value = nGramMin;
-		while (_order_value <= nGramMax) {
+		repeat (_order_range) {
 			if (_prefix_length >= _order_value) {
-				var _context_start = (_prefix_length - _order_value) + 1;
+				var _context_start  = (_prefix_length - _order_value) + 1;
 				var _context_string = string_copy(_source_string, _context_start, _order_value);
 
 				var _entry_struct = __context_dict[$ _context_string];
@@ -165,18 +169,18 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 					var _counts_struct = _entry_struct.counts;
 					var _total_count   = _entry_struct.total;
 
-					var _weight_value = _order_value; // longer context -> higher weight
-					_weight_sum += _weight_value;
+					var _weight_value = _order_value * _order_value;
+                    _weight_sum += _weight_value;
 
-					var _char_names = variable_struct_get_names(_counts_struct);
-					var _char_count = array_length(_char_names);
-					var _char_index = 0;
+					var _char_names  = variable_struct_get_names(_counts_struct);
+					var _char_count  = array_length(_char_names);
+					var _char_index  = 0;
 
-					while (_char_index < _char_count) {
-						var _char_value = _char_names[_char_index];
+					repeat (_char_count) {
+						var _char_value  = _char_names[_char_index];
 						var _count_value = _counts_struct[$ _char_value];
 
-						var _prob_value = _count_value / _total_count;
+						var _prob_value  = _count_value / _total_count;
 
 						var _old_score = _score_struct[$ _char_value];
 						if (_old_score == undefined) {
@@ -187,12 +191,13 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 						}
 
 						_char_index++;
-					}
+					};
 				}
 			}
 
 			_order_value++;
-		}
+			_order_index++;
+		};
 
 		// Convert scores into result entries
 		if (_weight_sum > 0) {
@@ -219,7 +224,7 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 		__finalize_results();
 		return self;
 	};
-
+	
 	#region jsDoc
 	/// @func  predict_best()
 	/// @desc  Convenience helper. Predicts next characters for the given prefix
@@ -232,6 +237,52 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 		predict(_prefix_string);
 		return get_top_value();
 	};
+	
+	#region jsDoc
+    /// @func  predict_next_best()
+    /// @desc  Greedy multi-step predictor that uses the current model to
+    ///        repeatedly predict the next best character without mutating
+    ///        the internal result arrays. Starting from the current __input
+    ///        prefix, it returns an array of structs:
+    ///        {
+    ///            value      : String (predicted character),
+    ///            prefix     : String (prefix after appending value),
+    ///            probability: Real   (0..1, probability at that step)
+    ///        }
+    ///        After completion, __input is restored to its original value.
+    /// @param {Real} _steps
+    /// @returns {Array<Struct>}
+    #endregion
+    static predict_next_best = function(_steps) {
+        if (_steps <= 0)
+		|| (__input == "") {
+            return [];
+        }
+		
+        var _original_input   = __input;
+        var _current_prefix   = __input;
+        var _sequence_results = [];
+		
+        var _step_index = 0;
+        while (_step_index < _steps) {
+	        predict(_current_prefix);
+			var _value = get_top_value();
+			var _score = get_top_score();
+			var _step_entry = {
+                value      : _value,
+                prefix     : _current_prefix,
+                probability: _score
+            };
+            array_push(_sequence_results, _step_entry);
+			
+			_current_prefix += _value;
+			
+            _step_index++;
+        }
+		
+        __input = _original_input;
+        return _sequence_results;
+    };
 	
 	#region Private
 	
@@ -254,9 +305,7 @@ function NgramStringPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10, _cas
 
 	static __compare = function(_entry_a, _entry_b) {
 		var _difference = _entry_b.probability - _entry_a.probability;
-		if (_difference > 0) return 1;
-		if (_difference < 0) return -1;
-		return 0;
+		return sign(_difference);
 	};
 
 	static __clear_model = function() {

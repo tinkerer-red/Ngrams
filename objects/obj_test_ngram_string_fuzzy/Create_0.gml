@@ -1,3 +1,4 @@
+show_debug_overlay(true);
 //Create a string matching handler
 ngram = new NgramStringFuzzy(1, 4, 10, false);
 

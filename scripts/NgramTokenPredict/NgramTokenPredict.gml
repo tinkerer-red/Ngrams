@@ -8,7 +8,7 @@
 /// @param {Real} _max_results : Maximum number of prediction results.
 /// @returns {Struct.NgramTokenPredict}
 #endregion
-function NgramTokenPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10)
+function NgramTokenPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10)
 	: NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 	// Encode a context window of tokens into a stable string key
@@ -304,9 +304,7 @@ function NgramTokenPredict(_n_gram_min=1, _n_gram_max=25, _max_results=10)
 
 	static __compare = function(_entry_a, _entry_b) {
 		var _difference = _entry_b.probability - _entry_a.probability;
-		if (_difference > 0) return 1;
-		if (_difference < 0) return -1;
-		return 0;
+		return sign(_difference);
 	};
 
 	static __clear_model = function() {

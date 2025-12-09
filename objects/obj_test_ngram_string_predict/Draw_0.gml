@@ -7,6 +7,7 @@ _string += "Type to complete a word\n";
 _string += "Input = \"" + keyboard_string + "\"\n";
 _string += "\n";
 _string += "Best Letter = \"" + string(ngram.predict_best()) + "\"\n";
+_string += "Next Best = \"" + string(next_best) + "\"\n";
 _string += "\n";
 _string += "Letters = \"" + string(ngram.get_value_array()) + "\"\n";
 _string += "Strengths = \"" + string(ngram.get_score_array()) + "\"\n";
