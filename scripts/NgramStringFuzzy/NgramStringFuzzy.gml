@@ -234,7 +234,8 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 							// else: ignore new candidate, we are past cap
 						}
 						else {
-							_existing_entry.strength += 1;
+							var _weight = _current_size*_current_size;
+							_existing_entry.strength += _weight;
 						}
 						
 						_match_index++;

@@ -251,7 +251,8 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 							}
 						}
 						else {
-							_existing_entry.strength += 1;
+							var _weight = _current_size*_current_size;
+							_existing_entry.strength += _weight;
 						}
 
 						_hash_index++;
