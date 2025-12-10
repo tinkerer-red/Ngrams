@@ -233,7 +233,7 @@ function NgramStringFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10, _case_s
 								var _found_string = struct_get_from_hash(__hash_to_name, _hash)
 								var _new_entry = {
 									word    : _found_string,
-									strength: 1 - (abs(string_length(_found_string)-_source_length))*0.25
+									strength: 1
 								};
 								
 								_result_dict_struct[$ _found_string] = _new_entry;
@@ -244,7 +244,7 @@ function NgramStringFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10, _case_s
 						}
 						else {
 							//var _weight = _current_size*_current_size;
-							_existing_entry.strength += 1 - (abs(string_length(_existing_entry.word)-_source_length))*0.25
+							_existing_entry.strength += 1;
 						}
 						
 						_match_index++;

@@ -251,7 +251,7 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10)
 
 									var _new_entry = {
 										value    : _seq_value,
-										strength : 1 - (abs(array_length(_seq_value)-_input_length))*0.25
+										strength : 1
 									};
 
 									_result_dict[$ _identity_key] = _new_entry;
@@ -261,7 +261,7 @@ function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10)
 							}
 						}
 						else {
-							_existing_entry.strength += 1 - (abs(string_length(_existing_entry.value)-_input_length))*0.25;
+							_existing_entry.strength += 1;
 						}
 
 						_hash_index++;
