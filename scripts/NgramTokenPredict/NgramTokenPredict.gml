@@ -285,6 +285,56 @@ function NgramTokenPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10)
 		return get_top_value();
 	};
 	
+	#region jsDoc
+	/// @func  predict_next_best()
+	/// @desc  Greedy multi-step predictor that uses the current model to
+	///        repeatedly predict the next best character without mutating
+	///        the internal result arrays. Starting from the current __input
+	///        prefix, it returns an array of structs:
+	///        {
+	///            value      : String (predicted character),
+	///            prefix     : String (prefix after appending value),
+	///            probability: Real   (0..1, probability at that step)
+	///        }
+	///        After completion, __input is restored to its original value.
+	/// @param {Real} _steps
+	/// @returns {Array<Struct>}
+	#endregion
+	static predict_next_best = function(_steps) {
+		if (_steps <= 0)
+		|| (__input == "") {
+			return [];
+		}
+		
+		var _original_input   = __input;
+		var _current_prefix   = __input;
+		var _sequence_results = [];
+		
+		var _step_index = 0;
+		while (_step_index < _steps) {
+	        predict(_current_prefix);
+			var _results = get_result_array();
+			
+			if (array_length(_results) == 0) break;
+			
+			var _value = get_top_value();
+			var _score = get_top_score();
+			var _step_entry = {
+				value      : _value,
+				prefix     : _current_prefix,
+				probability: _score
+			};
+			array_push(_sequence_results, _step_entry);
+			
+			_current_prefix += _value;
+			
+			_step_index++;
+		}
+		
+		__input = _original_input;
+		return _sequence_results;
+	};
+	
 	#region Private
 	
 	// context_key (string) -> { entries: [ { token, count } ], total: Real }

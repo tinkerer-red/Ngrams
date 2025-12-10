@@ -264,6 +264,10 @@ function NgramStringPredict(_n_gram_min=3, _n_gram_max=25, _max_results=10, _cas
 		var _step_index = 0;
 		while (_step_index < _steps) {
 	        predict(_current_prefix);
+			var _results = get_result_array();
+			
+			if (array_length(_results) == 0) break;
+			
 			var _value = get_top_value();
 			var _score = get_top_score();
 			var _step_entry = {
