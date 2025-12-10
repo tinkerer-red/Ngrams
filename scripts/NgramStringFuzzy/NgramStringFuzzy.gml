@@ -139,7 +139,7 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 		return self;
 	};
 	
-	// LEXICON / SEARCH
+	// SEARCH
 	
 	#region jsDoc
 	/// @func  search()
@@ -166,6 +166,7 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 		__clear_results();
 		__input = _input_string;
 		
+		var _used_grams_struct = {};
 		var _result_dict_struct = {};
 		var _result_array_ref   = __result_array;
 		
@@ -207,6 +208,14 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 			var _position_index = 1;
 			repeat (_max_position) {
 				var _gram_substring = string_copy(_string_value, _position_index, _current_size);
+				
+				if (struct_exists(_used_grams_struct, _gram_substring)) {
+					_position_index++;
+					continue;
+				}
+				else {
+					struct_set(_used_grams_struct, _gram_substring, true);
+				}
 				
 				var _hash_array = __ngram_dict[$ _gram_substring];
 				

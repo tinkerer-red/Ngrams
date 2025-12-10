@@ -208,7 +208,9 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 
 		var _max_results = maxResults;
 		var _found_count = array_length(_result_array_ref);
-
+		
+		var _used_grams_struct = {};
+		
 		// Search from largest n-gram down to smallest.
 		var _current_size = _local_max;
 
@@ -220,7 +222,15 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 			var _start_index = 0;
 			repeat (_max_start + 1) {
 				var _key = __encode_sequence_key(_input_tokens, _start_index, _current_size);
-
+				
+				if (struct_exists(_used_grams_struct, _key)) {
+					_hash_index++;
+					continue;
+				}
+				else {
+					struct_set(_used_grams_struct, _key, true);
+				}
+				
 				var _hash_array = __ngram_dict[$ _key];
 
 				if (is_array(_hash_array)) {
@@ -229,7 +239,7 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 
 					repeat (_hash_length) {
 						var _seq_hash = _hash_array[_hash_index];
-
+						
 						// Check for existing candidate via hash
 						var _existing_entry = struct_get_from_hash(_result_dict, _seq_hash);
 
