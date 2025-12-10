@@ -8,7 +8,7 @@
 /// @param {Bool} _case_sense  : Whether matching is case-sensitive.
 /// @returns {Struct.NgramStringFuzzy}
 #endregion
-function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_sense=false)
+function NgramStringFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10, _case_sense=false)
 	: NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 	#region jsDoc
@@ -233,7 +233,7 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 								var _found_string = struct_get_from_hash(__hash_to_name, _hash)
 								var _new_entry = {
 									word    : _found_string,
-									strength: 1
+									strength: 1 - (abs(string_length(_found_string)-_source_length))*0.25
 								};
 								
 								_result_dict_struct[$ _found_string] = _new_entry;
@@ -243,8 +243,8 @@ function NgramStringFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10, _case_s
 							// else: ignore new candidate, we are past cap
 						}
 						else {
-							var _weight = _current_size*_current_size;
-							_existing_entry.strength += _weight;
+							//var _weight = _current_size*_current_size;
+							_existing_entry.strength += 1 - (abs(string_length(_existing_entry.word)-_source_length))*0.25
 						}
 						
 						_match_index++;

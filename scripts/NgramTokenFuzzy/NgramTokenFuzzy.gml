@@ -8,7 +8,7 @@
 /// @param {Real} _max_results : Maximum number of results to return.
 /// @returns {Struct.NgramTokenFuzzy}
 #endregion
-function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
+function NgramTokenFuzzy(_n_gram_min=1, _n_gram_max=5, _max_results=10)
 	: NgramBase(_n_gram_min, _n_gram_max, _max_results) constructor {
 	
 	#region jsDoc
@@ -172,7 +172,7 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 		var _result_array_ref = __result_array;
 
 		var _input_length = array_length(_input_tokens);
-
+		
 		// Exact match check
 		if (_input_length > 0) {
 			var _full_identity = __encode_sequence_key(_input_tokens, 0, _input_length);
@@ -251,7 +251,7 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 
 									var _new_entry = {
 										value    : _seq_value,
-										strength : 1
+										strength : 1 - (abs(array_length(_seq_value)-_input_length))*0.25
 									};
 
 									_result_dict[$ _identity_key] = _new_entry;
@@ -261,8 +261,7 @@ function NgramTokenFuzzy(_n_gram_min=3, _n_gram_max=5, _max_results=10)
 							}
 						}
 						else {
-							var _weight = _current_size*_current_size;
-							_existing_entry.strength += _weight;
+							_existing_entry.strength += 1 - (abs(string_length(_existing_entry.value)-_input_length))*0.25;
 						}
 
 						_hash_index++;
